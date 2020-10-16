@@ -1,5 +1,9 @@
 const {
-    getPlanesDataModel, createPlaneDataModel, putPlaneDataModel, getPlanesDataByIdModel, deletePlaneDataModel
+    getPlanesDataModel,
+    createPlaneDataModel,
+    putPlaneDataModel,
+    getPlanesDataByIdModel,
+    deletePlaneDataModel
 } = require('../models/planes')
 
 module.exports = {
