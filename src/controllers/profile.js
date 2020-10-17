@@ -1,13 +1,14 @@
+const profile = require('../models/profile')
 const {
-    getPlanesDataModel,
-    createPlaneDataModel,
-    putPlaneDataModel,
-    getPlanesDataByIdModel,
-    deletePlaneDataModel
-} = require('../models/planes')
+    getProfileDataModel,
+    getProfileDataByIdModel,
+    createProfileDataModel,
+    putProfileDataModel,
+    deleteProfileDataModel
+} = require('../models/profile')
 
 module.exports = {
-    getPlanesData: (req, res) => {
+    getProfileData: (req, res) => {
         let { search, page, limit } = req.query
         let searchKey = ''
         let searchValue = ''
@@ -15,21 +16,20 @@ module.exports = {
           searchKey = Object.keys(search)[0]
           searchValue = Object.values(search)[0]
         } else {
-          searchKey = 'plane_name'
+          searchKey = 'full_name'
           searchValue = search || ''
         }
         !limit ? limit = 20 : limit = parseInt(limit)
         !page ? page = 1 : page = parseInt(page)
         const offset = (page - 1) * limit
-        getPlanesDataModel(searchKey, searchValue, limit, offset, result => {
+        getProfileDataModel(searchKey, searchValue, limit, offset, result => {
           if (result.length) {
             res.status(200).send({
               success: true,
-              message: 'list planes',
+              message: 'list profile',
               data: result
             })
           } else {
-            console.log(result)
             res.status(404).send({
               success: false,
               message: 'there is no item on list'
@@ -37,52 +37,59 @@ module.exports = {
           }
         })
     },
-    getPlaneDataById: (req, res) => {
+    getProfileDataById: (req, res) => {
         const { id } = req.params
-        getPlanesDataByIdModel(id, result => {
+        getProfileDataByIdModel(id, result => {
           if (result.length) {
             res.status(200).send({
               success: true,
-              message: `Data plane with id = ${id}`,
+              message: `Data profile with id = ${id}`,
               data: result[0]
             })
           } else {
             res.status(404).send({
               success: false,
-              message: `Data plane with id = ${id} was not found!`
+              message: `Data profile with id = ${id} was not found!`
             })
           }
         })
     },
-    createPlaneData: (req, res) => {
-        const { plane_name } = req.body
-        const image = typeof req.file === 'undefined' ? '' : req.file.filename
-        if (plane_name) {
-          createPlaneDataModel(plane_name, image, result => {
+    createProfileData: (req, res) => {
+        const { id_account } = req.body
+        if (id_account) {
+          createProfileDataModel(id_account, result => {
             res.status(200).send({
               success: true,
-              message: 'plane has been created'
+              message: 'profile has been created'
             })
           })
         } else {
           res.status(400).send({
             success: false,
-            message: 'the field plane name must be filled!'
+            message: 'the field id account must be filled!'
           })
         }
     },
-    putPlaneData: (req, res) => {
-        const { plane_name } = req.body
+    putProfileData: (req, res) => {
+        const {
+          city,
+          address,
+          full_name,
+          email,
+          password,
+          phone_number
+        } = req.body
         const id = req.params.id
         const image = typeof req.file === 'undefined' ? '' : req.file.filename
-        if (plane_name) {
-          getPlanesDataByIdModel(id, result => {
+        if (city && address && full_name && email && password && phone_number) {
+          getProfileDataByIdModel(id, result => {
             if (result.length) {
-              putPlaneDataModel(id, plane_name, image, result => {
+              putProfileDataModel(id, [city, address, full_name, email, password, phone_number], image,
+                result => {
                 if (result.affectedRows) {
                   res.status(200).send({
                     success: true,
-                    message: `plane with id ${id} has been updated`
+                    message: `profile with id account ${id} has been updated`
                   })
                 } else {
                   res.status(400).send({
@@ -94,26 +101,26 @@ module.exports = {
             } else {
               res.status(404).send({
                 success: false,
-                message: `plane with id ${id} is not found!`
+                message: `profile with id account ${id} is not found!`
               })
             }
           })
         } else {
           res.status(400).send({
             success: false,
-            message: 'plane name must be filled!'
+            message: 'all field must be filled!'
           })
         }
       },
-      deletePlaneData: (req, res) => {
+      deleteProfileData: (req, res) => {
         const { id } = req.params
-        getPlanesDataByIdModel(id, result => {
+        getProfileDataByIdModel(id, result => {
           if (result.length) {
-            deletePlaneDataModel(id, result => {
+            deleteProfileDataModel(id, result => {
               if (result.affectedRows) {
                 res.status(200).send({
                   success: true,
-                  message: `Item plane with id = ${id} has been deleted`
+                  message: `Item profile with id = ${id} has been deleted`
                 })
               } else {
                 res.status(400).send({
@@ -125,7 +132,7 @@ module.exports = {
           } else {
             res.status(404).send({
               success: false,
-              message: 'Data plane was not found!'
+              message: 'Data profile was not found!'
             })
           }
         })
