@@ -1,25 +1,19 @@
+/* eslint-disable camelcase */
+
 const db = require('../helper/database')
 module.exports = {
-    getProfileDataModel: (searchKey, searchValue, limit, offset, callBack) => {
-        db.query(`SELECT * FROM profile INNER JOIN account
-        ON profile.id_account = account.id_account WHERE ${searchKey} LIKE '%${searchValue}%' 
-        LIMIT ${limit} OFFSET ${offset}`, (err, result, fields) => {
-        !err ? callBack(result) : callBack(err)
-      })
-    },
-    getProfileDataByIdModel: (id, callBack) => {
-        db.query(`SELECT * FROM profile INNER JOIN account
-        ON profile.id_account = account.id_account WHERE id_profile = '${id}'`, (err, result, field) => {
-        !err ? callBack(result) : callBack(err)
-        })
-      },
-    createProfileDataModel: (id_account, callBack) => {
-        db.query(`INSERT INTO profile (id_account) VALUES ('${id_account}')`, (err, result, fields) => {
-        !err ? callBack(result) : callBack(err)
-        })
-      },
-    putProfileDataModel: (id_account, data, profile_image, callBack) => {
-        db.query(`UPDATE profile, account SET
+  getProfileDataModel: (searchKey, searchValue, limit, offset, callBack) => {
+    db.query(`SELECT A.id_account, A.full_name, A.email, A.phone_number, P.profile_image, P.city, P.address FROM profile AS P INNER JOIN account AS A ON P.id_account = A.id_account WHERE ${searchKey} LIKE '%${searchValue}%' LIMIT ${limit} OFFSET ${offset}`, (err, result, fields) => {
+      !err ? callBack(result) : callBack(err)
+    })
+  },
+  getProfileDataByIdModel: (id, callBack) => {
+    db.query(`SELECT A.id_account, A.full_name, A.email, A.phone_number, P.profile_image, P.city, P.address FROM profile AS P INNER JOIN account AS A ON P.id_account = A.id_account WHERE A.id_account = '${id}'`, (err, result, field) => {
+      !err ? callBack(result) : callBack(err)
+    })
+  },
+  putProfileDataModel: (id_account, data, profile_image, callBack) => {
+    db.query(`UPDATE profile, account SET
         profile_image = '${profile_image}',
         city = '${data[0]}',
         address = '${data[1]}',
@@ -28,13 +22,8 @@ module.exports = {
         password = '${data[4]}',
         phone_number = '${data[5]}'
         WHERE profile.id_account = ${id_account} AND account.id_account = ${id_account}`,
-        (err, result, fields) => {
-        !err ? callBack(result) : callBack(err)
-        })
-      },
-      deleteProfileDataModel: (id, callBack) => {
-        db.query(`DELETE FROM profile WHERE id_profile = '${id}'`, (err, result, fields) => {
-          !err ? callBack(result) : callBack(err)
-        })
-      }
+    (err, result, fields) => {
+      !err ? callBack(result) : callBack(err)
+    })
+  }
 }

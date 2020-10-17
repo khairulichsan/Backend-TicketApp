@@ -6,7 +6,7 @@ const storage = multer.diskStorage({
     callback(null, './assets/')
   },
   filename: (req, file, callback) => {
-    callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+    callback(null, file.fieldname + '-' + Date.now() + '.' + file.originalname.split('.')[1])
   }
 })
 const fileFilter = (request, file, callback) => {

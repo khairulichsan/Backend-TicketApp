@@ -7,10 +7,12 @@ const cors = require('cors')
 app.use('/uploads', express.static('Uploads'))
 
 const account = require('./src/routes/account')
+const profile = require('./src/routes/profile')
 // const order = require('./src/routers/price')
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/account', account)
+app.use('/profile', profile)
 // app.use('/order', order)
 
 app.use(cors())

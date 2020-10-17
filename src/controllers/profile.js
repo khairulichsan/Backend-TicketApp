@@ -1,13 +1,12 @@
 /* eslint-disable camelcase */
 
-const profile = require('../models/profile')
 const {
   getProfileDataModel,
   getProfileDataByIdModel,
-  createProfileDataModel,
-  putProfileDataModel,
-  deleteProfileDataModel
+  putProfileDataModel
 } = require('../models/profile')
+
+const jwt = require('jsonwebtoken')
 
 module.exports = {
   getProfileData: (req, res) => {
@@ -56,22 +55,6 @@ module.exports = {
       }
     })
   },
-  createProfileData: (req, res) => {
-    const { id_account } = req.body
-    if (id_account) {
-      createProfileDataModel(id_account, result => {
-        res.status(200).send({
-          success: true,
-          message: 'profile has been created'
-        })
-      })
-    } else {
-      res.status(400).send({
-        success: false,
-        message: 'the field id account must be filled!'
-      })
-    }
-  },
   putProfileData: (req, res) => {
     const {
       city,
@@ -81,17 +64,29 @@ module.exports = {
       password,
       phone_number
     } = req.body
-    const id = req.params.id
+    let id_account = ''
+    const token = req.headers.authorization.split(' ')[1]
+    jwt.verify(token, process.env.JWT_KEY, (error, result, response) => {
+      if ((error && error.name === 'JsonWebTokenError') || (error && error.name === 'TokenExpiredError')) {
+        response.status(403).send({
+          success: false,
+          message: error.message
+        })
+      } else {
+        id_account = result.id_account
+      }
+    })
     const image = typeof req.file === 'undefined' ? '' : req.file.filename
+
     if (city && address && full_name && email && password && phone_number) {
-      getProfileDataByIdModel(id, result => {
+      getProfileDataByIdModel(id_account, result => {
         if (result.length) {
-          putProfileDataModel(id, [city, address, full_name, email, password, phone_number], image,
+          putProfileDataModel(id_account, [city, address, full_name, email, password, phone_number], image,
             result => {
               if (result.affectedRows) {
                 res.status(200).send({
                   success: true,
-                  message: `profile with id account ${id} has been updated`
+                  message: `profile with id account ${id_account} has been updated`
                 })
               } else {
                 res.status(400).send({
@@ -103,7 +98,7 @@ module.exports = {
         } else {
           res.status(404).send({
             success: false,
-            message: `profile with id account ${id} is not found!`
+            message: `profile with id account ${id_account} is not found!`
           })
         }
       })
@@ -113,30 +108,5 @@ module.exports = {
         message: 'all field must be filled!'
       })
     }
-  },
-  deleteProfileData: (req, res) => {
-    const { id } = req.params
-    getProfileDataByIdModel(id, result => {
-      if (result.length) {
-        deleteProfileDataModel(id, result => {
-          if (result.affectedRows) {
-            res.status(200).send({
-              success: true,
-              message: `Item profile with id = ${id} has been deleted`
-            })
-          } else {
-            res.status(400).send({
-              success: false,
-              message: 'Failed to delete'
-            })
-          }
-        })
-      } else {
-        res.status(404).send({
-          success: false,
-          message: 'Data profile was not found!'
-        })
-      }
-    })
   }
 }
