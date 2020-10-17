@@ -2,7 +2,10 @@ const db = require('../helper/database')
 module.exports = {
   postUserModel: (setData) => {
     return new Promise((resolve, reject) => {
-      db.query('INSERT INTO account SET ?', setData, (error, result) => {
+      db.query('BEGIN')
+      db.query('INSERT INTO account SET ?', setData)
+      db.query('INSERT INTO profile (id_account) VALUES (LAST_INSERT_ID())')
+      db.query('COMMIT', (error, result) => {
         if (!error) {
           resolve(result)
         } else {
