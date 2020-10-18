@@ -4,7 +4,7 @@ const app = express()
 require('dotenv').config()
 const cors = require('cors')
 
-app.use('/uploads', express.static('Uploads'))
+app.use('/uploads', express.static('assets'))
 
 const account = require('./src/routes/account')
 const profile = require('./src/routes/profile')
