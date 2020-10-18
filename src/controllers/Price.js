@@ -1,30 +1,30 @@
 /* eslint-disable camelcase */
 
 const {
-  checkpriceModel, postPaymentModel, postOrderModel
-} = require('../Model/Price')
+  checkPriceModel,
+  postPaymentModel,
+  postOrderModel,
+  detailOrderModel
+} = require('../models/price')
 
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+// const jwt = require('jsonwebtoken')
 require('dotenv')
 
 module.exports = {
   orderUser: async (request, response) => {
     try {
-      const { id_account, order_name, total_price, status_payment, id_plane, passangger, order_class, city_destination, city_depature, times_flight } = request.body
+      const { id_account, order_name, total_price, id_plane, passengger, order_class, city_destination, city_depature, times_flight } = request.body
 
-      const checkDataPrice = await checkpriceModel([id_plane, order_class, passangger, city_destination, city_depature, times_flight])
+      const checkDataPrice = await checkPriceModel([id_plane, order_class, passengger, city_destination, city_depature, times_flight])
 
       const setData = {
         id_account,
         total_price,
-        status_payment,
         created_at: new Date(),
         update_at: new Date()
       }
 
-      const postPayment = await postPaymentModel(setData)
-      console.log(postPayment)
+      await postPaymentModel(setData)
 
       const setData2 = {
         id_account,
@@ -32,15 +32,13 @@ module.exports = {
         order_name,
         created_at: new Date(),
         update_at: new Date()
-
       }
 
       const postOrder = await postOrderModel(setData2)
-      console.log(postOrder)
 
       response.send({
         success: true,
-        message: 'Succes Register User!',
+        message: 'Succes order!',
         data: postOrder
       })
     } catch (error) {
@@ -56,20 +54,20 @@ module.exports = {
     try {
       const { order_class, nadult, nchild, city_destination, city_depature, times_flight } = request.body
       if (nadult >= 0 && nchild >= 0) {
-        passangger = 'adult'
+        let passengger = 'adult'
 
-        const checkDataPrice = await checkpriceModel([order_class, passangger, city_destination, city_depature, times_flight])
+        const checkDataPrice = await checkPriceModel([order_class, passengger, city_destination, city_depature, times_flight])
         console.log(checkDataPrice.length)
         const price1 = (checkDataPrice[0].price) * nadult
 
-        passangger = 'child'
+        passengger = 'child'
 
-        const checkDataPrice2 = await checkpriceModel([order_class, passangger, city_destination, city_depature, times_flight])
+        const checkDataPrice2 = await checkPriceModel([order_class, passengger, city_destination, city_depature, times_flight])
         console.log(checkDataPrice2[0].price)
         const price2 = (checkDataPrice2[0].price) * nchild
 
         var list = []
-        for (i = 0; i < checkDataPrice.length; i++) {
+        for (let i = 0; i < checkDataPrice.length; i++) {
           const setDataArray = {
             totalharga: (checkDataPrice[i].price * nadult) + (checkDataPrice2[i].price * nchild),
             plane: checkDataPrice[i].id_plane,
@@ -83,11 +81,9 @@ module.exports = {
           list[i] = setDataArray
         }
 
-        console.log(list)
-
         response.send({
           success: true,
-          message: 'Succes Register User!',
+          message: 'Succes!',
           data: list
         })
       } else {
@@ -103,6 +99,26 @@ module.exports = {
         message: 'Bad Request'
       })
     }
-  }
+  },
 
+  detailOrder: async (request, response) => {
+    try {
+      const id_order = request.params.id
+      const result = await detailOrderModel(id_order)
+      delete result[0].created_at
+      delete result[0].update_at
+      delete result[0].id_plane
+      delete result[0].id_price
+      response.send({
+        success: true,
+        message: 'Detail order!',
+        data: result[0]
+      })
+    } catch (error) {
+      response.status(400).send({
+        success: false,
+        message: 'Bad Request'
+      })
+    }
+  }
 }
